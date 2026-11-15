@@ -1,34 +1,11 @@
 import os
-from functools import lru_cache
-from typing import Generator
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from dotenv import load_dotenv
 
-load_dotenv()
-database_url = os.getenv("DATABASE_USER_AUTHENTICATION")
-
-from Auth_funcs.crud_auth import (
-    Base,
-    check_login,
-    check_user_exists,
-    regis_user,
-)
-
-
-class UserDatas(BaseModel):
-    user_name: str
-    user_password: str
-    user_email: str
-
-
-class LoginData(BaseModel):
-    user_name: str
-    user_password: str
+from Auth_funcs.auth_endpoints import router as auth_router
+from Auth_funcs.database import get_engine
 
 
 def get_cors_origins() -> list[str]:
@@ -57,19 +34,7 @@ app.add_middleware(
 )
 
 
-@lru_cache(maxsize=1)
-def get_engine():
-    database_url = os.getenv("DATABASE_USER_AUTHENTICATION")
-    if not database_url:
-        raise RuntimeError("Set the DATABASE_USER_AUTHENTICATION environment variable")
-    engine = create_engine(database_url)
-    Base.metadata.create_all(engine)
-    return engine
-
-
-def get_db() -> Generator[Session, None, None]:
-    with Session(get_engine()) as session:
-        yield session
+app.include_router(auth_router)
 
 
 @app.get("/")
@@ -77,47 +42,23 @@ def check_run():
     return {"message": "Backend Running..."}
 
 
-@app.post("/register", status_code=status.HTTP_201_CREATED)
-def register_user(user: UserDatas, session: Session = Depends(get_db)):
-    if check_user_exists(session, user.user_name, user.user_email):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Username or email already exists.",
-        )
-    regis_user(session, user.user_name, user.user_password, user.user_email)
-    return {"message": "User registered successfully."}
+def run_terminal_tools():
+    while True:
+        action = input("Enter 'run' to start the API, 'test' for database tools, or 'exit': ")
+        if action == "run":
+            import uvicorn
 
-
-@app.post("/login")
-def login_user(user: LoginData, session: Session = Depends(get_db)):
-    if not check_login(session, user.user_name, user.user_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password.",
-        )
-    return {"message": "User logged in successfully."}
-
-
-#===========================
-# Terminal database testing
-#===========================
-act = "neutral"
-while act != "exit":
-    act = input("Enter 'run' to start the FastAPI server or 'test' to run terminal tests: ")
-    if act == "run":
-        import uvicorn
-        uvicorn.run(app, host="127.0.0.1", port=8000)
-    else:
-        from terminal_tester import terminal_db_tester
-        with Session(get_engine()) as session:
-            terminal_db_tester(session)
-    act = input(
-        "Enter the action you want to perform (add, delete, update, view) or 'exit' to quit: "
-    )
-    if act in ["add", "delete", "update", "view"]:
-        with Session(get_engine()) as session:
+            uvicorn.run(app, host="127.0.0.1", port=8000)
+        elif action == "test":
             from terminal_tester import terminal_db_tester
 
-            terminal_db_tester(session)
-    elif act != "exit":
-        print("Invalid action. Please try again.")
+            with Session(get_engine()) as session:
+                terminal_db_tester(session)
+        elif action == "exit":
+            return
+        else:
+            print("Invalid action. Please enter run, test, or exit.")
+
+
+if __name__ == "__main__":
+    run_terminal_tools()
