@@ -3,6 +3,7 @@ import secrets
 
 from sqlalchemy.orm import Session
 
+from Auth_funcs.database import createTableInCase
 from Auth_funcs.crud_auth import (
     AdminAuth,
     PASSWORD_HASH_PREFIX,
@@ -69,9 +70,10 @@ def _register_user(session: Session):
     if check_user_exists(session, user_name, user_email):
         print("That username or email is already registered.")
         return
-
+    
+    assign_group = input("User group: ").strip()
     password = getpass.getpass("Password: ")
-    regis_user(session, user_name, password, user_email, secrets.token_hex(16))
+    regis_user(session, user_name, password, user_email, secrets.token_hex(16), assign_group)
     print("User registered; password saved as a hash.")
 
 
@@ -206,6 +208,11 @@ def _delete_simple_user(session: Session):
     print("Simple-login user deleted.")
 
 
+def _create_missing_tables(_: Session):
+    createTableInCase()
+    print("Database tables are ready.")
+
+
 def terminal_db_tester(session: Session):
     actions = {
         "1": ("Register user", _register_user),
@@ -221,6 +228,7 @@ def terminal_db_tester(session: Session):
         "11": ("List simple-login users", _show_simple_users),
         "12": ("Delete simple-login user", _delete_simple_user),
         "13": ("Delete admin", _delete_admin),
+        "14": ("Create missing tables if needed", _create_missing_tables),
     }
 
     while True:
