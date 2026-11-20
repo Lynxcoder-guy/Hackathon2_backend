@@ -7,6 +7,9 @@ from sqlalchemy.orm import Session
 from Auth_funcs.auth_endpoints import router as auth_router
 from Auth_funcs.database import get_engine
 
+from Pre_Checkup.pre_checkup_endpoints import router as pre_checkup_router
+from Post_Checkup.post_checkup_endpoints import router as post_checkup_router
+from Weekly_Condition_logs.wcl_endpoints import router as wcl_router
 
 def get_cors_origins() -> list[str]:
     configured_origins = os.getenv("BACKEND_CORS_ORIGINS")
@@ -35,6 +38,9 @@ app.add_middleware(
 
 
 app.include_router(auth_router)
+app.include_router(post_checkup_router)
+app.include_router(pre_checkup_router)
+app.include_router(wcl_router)
 
 
 @app.get("/")

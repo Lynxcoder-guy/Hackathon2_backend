@@ -1,0 +1,30 @@
+{
+    "patient_id": "P001",
+    "generated_at": "2026-11-20T06:22:56.216452+00:00",
+    "summary": {
+        "main_complaint": "Kelelahan (Fatigue) dan Sakit kepala (Headache)",
+        "symptoms": [
+            "Headache",
+            "Fatigue"
+        ],
+        "symptom_duration": "Tercatat selama 2 hari (17 - 18 November 2026)",
+        "symptom_frequency": "Fatigue dilaporkan pada kedua hari pemantauan (2 dari 2 hari); Headache hanya dilaporkan pada hari pertama (1 dari 2 hari)",
+        "sleep_pattern": "Durasi tidur tercatat 6 jam pada 17 November dan meningkat menjadi 7 jam pada 18 November",
+        "energy_level": "Terdapat perubahan dari Low (17 November) menjadi Normal (18 November)",
+        "mood": "Terdapat perubahan dari Normal (17 November) menjadi Good (18 November)",
+        "physical_activity": "Aktivitas fisik berubah dari Light (17 November) menjadi Moderate (18 November)",
+        "weekly_patterns": "Data belum mencukupi untuk menyimpulkan pola mingguan (baru mencakup 2 hari log)",
+        "additional_notes": "Sakit kepala tidak lagi dilaporkan pada hari kedua seiring dengan bertambahnya durasi tidur dan membaiknya tingkat energi serta suasana hati."
+    },
+    "doctor_attention": [
+        "Keluhan fatigue (kelelahan) yang masih bertahan pada hari kedua meskipun durasi tidur bertambah dan tingkat energi dilaporkan normal.",
+        "Karakteristik, intensitas, dan riwayat sakit kepala yang dialami pada tanggal 17 November 2026."
+    ],
+    "missing_information": [
+        "Intensitas atau skala keparahan gejala (sakit kepala dan kelelahan)",
+        "Riwayat penyakit penyerta dan pengobatan yang sedang dijalani",
+        "Faktor pemicu atau pereda gejala",
+        "Kualitas tidur dan asupan cairan/nutrisi pasien"
+    ],
+    "disclaimer": "Ringkasan berdasarkan laporan pasien, bukan diagnosis medis."
+}

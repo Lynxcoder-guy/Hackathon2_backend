@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import secrets
+from typing import Optional
 
 from sqlalchemy import Column, String
 from sqlalchemy.orm import Session, declarative_base
@@ -40,6 +41,7 @@ class users_auths(Base):
     userPassword = Column(String(255), nullable=False, unique=False)
     email = Column(String(255), nullable=False, unique=True)
     userToken = Column(String(255), nullable=False, unique=True)
+    assignedGroup = Column(String(100), nullable=True)
 
 class simple_auth(Base):
     __tablename__ = "simple_auths"
@@ -58,12 +60,20 @@ class AdminAuth(Base):
     adminGroupName = Column(String(100), nullable=False)
 
 
-def regis_user(session: Session, user_name, user_password, user_email, generated_tokens):
+def regis_user(
+    session: Session,
+    user_name,
+    user_password,
+    user_email,
+    generated_tokens,
+    assign_group: Optional[str] = None,
+):
     new_user = users_auths(
         userName=user_name,
         userPassword=hash_password(user_password),
         email=user_email,
-        userToken=generated_tokens
+        userToken=generated_tokens,
+        assignedGroup=assign_group
     )
     session.add(new_user)
     session.commit()
@@ -173,4 +183,4 @@ def view_all(session: Session):
 
 def exit():
     print("Exiting terminal tester.")
-    exit()
+    raise SystemExit

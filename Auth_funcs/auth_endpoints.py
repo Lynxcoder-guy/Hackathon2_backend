@@ -15,10 +15,11 @@ from Auth_funcs.crud_auth import (
 )
 from Auth_funcs.database import get_db
 
-class UserDatas(BaseModel):
+class AdminDatas(BaseModel):
     user_name: str
     user_password: str
     user_email: str
+    user_group: str
 
 
 class LoginData(BaseModel):
@@ -31,15 +32,18 @@ class SimpleLoginData(BaseModel):
     user_group: str
 
 
-class AdminRegisterData(UserDatas):
+class AdminRegisterData(BaseModel):
+    user_name: str
+    user_password: str
+    user_email: str
     user_group: str
 
 
 router = APIRouter()
 
 #For the admins to sign their users into the system
-@router.post("/register", status_code=status.HTTP_201_CREATED)
-def register_user(user: UserDatas, session: Session = Depends(get_db)):
+@router.post("/register-admin", status_code=status.HTTP_201_CREATED)
+def register_user(user: AdminDatas, session: Session = Depends(get_db)):
     if check_user_exists(session, user.user_name, user.user_email):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -53,18 +57,19 @@ def register_user(user: UserDatas, session: Session = Depends(get_db)):
         user.user_password,
         user.user_email,
         user_token,
+        user.user_group,
     )
     return {"message": "User registered successfully.", "user_token": user_token}
 
-
-@router.post("/login")
+#For admin to check the user data
+@router.post("/check-user")
 def login_user(user: LoginData, session: Session = Depends(get_db)):
     if not check_login(session, user.user_name, user.user_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password.",
         )
-    return {"message": "User logged in successfully."}
+    return {"message": "Log-in to users account successfully."}
 
 
 #For easier and simpler login
@@ -97,6 +102,7 @@ def admin_registration(admin: AdminRegisterData, session: Session = Depends(get_
     )
     return {"message": "Admin registered successfully.", "admin_token": admin_token}
 
+#For the admin to log into their console to manage and sign the users
 @router.post("/admin-login")
 def admin_login(admin: LoginData, session: Session = Depends(get_db)):
     if not check_admin_login(session, admin.user_name, admin.user_password):
@@ -105,3 +111,4 @@ def admin_login(admin: LoginData, session: Session = Depends(get_db)):
             detail="Incorrect admin username or password.",
         )
     return {"message": "Admin logged in successfully."}
+

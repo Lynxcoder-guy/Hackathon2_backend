@@ -1,0 +1,20 @@
+[
+    {
+        "patient_id": "P001",
+        "date": "2026-11-17",
+        "symptoms": ["Headache", "Fatigue"],
+        "sleep_hours": 6,
+        "energy_level": "Low",
+        "mood": "Normal",
+        "physical_activity": "Light"
+    },
+    {
+        "patient_id": "P001",
+        "date": "2026-11-18",
+        "symptoms": ["Fatigue"],
+        "sleep_hours": 7,
+        "energy_level": "Normal",
+        "mood": "Good",
+        "physical_activity": "Moderate"
+    }
+]
