@@ -10,42 +10,48 @@ from Auth_funcs.database import get_engine
 from Pre_Checkup.pre_checkup_endpoints import router as pre_checkup_router
 from Post_Checkup.post_checkup_endpoints import router as post_checkup_router
 from Weekly_Condition_logs.wcl_endpoints import router as wcl_router
+from Health_Stats.health_stats_endpoints import router as health_stats_router
 
-def get_cors_origins() -> list[str]:
+def get_cors_origins() -> tuple[list[str], str | None]:
     configured_origins = os.getenv("BACKEND_CORS_ORIGINS")
     if configured_origins:
-        return [
-            origin.strip()
-            for origin in configured_origins.split(",")
-            if origin.strip()
-        ]
-    return [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ]
+        return (
+            [
+                origin.strip()
+                for origin in configured_origins.split(",")
+                if origin.strip()
+            ],
+            None,
+        )
+    return (
+        [],
+        r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    )
 
 
-app = FastAPI(title="Backend API")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=get_cors_origins(),
+api = FastAPI(title="Backend API")
+cors_origins, cors_origin_regex = get_cors_origins()
+
+api.include_router(auth_router)
+api.include_router(post_checkup_router)
+api.include_router(pre_checkup_router)
+api.include_router(wcl_router)
+api.include_router(health_stats_router)
+
+
+@api.get("/")
+def check_run():
+    return {"message": "Backend Running..."}
+
+
+app = CORSMiddleware(
+    app=api,
+    allow_origins=cors_origins,
+    allow_origin_regex=cors_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-app.include_router(auth_router)
-app.include_router(post_checkup_router)
-app.include_router(pre_checkup_router)
-app.include_router(wcl_router)
-
-
-@app.get("/")
-def check_run():
-    return {"message": "Backend Running..."}
 
 
 def run_terminal_tools():

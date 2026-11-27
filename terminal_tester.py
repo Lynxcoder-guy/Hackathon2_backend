@@ -1,5 +1,7 @@
+import json
 import getpass
 import secrets
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
@@ -8,17 +10,20 @@ from Auth_funcs.crud_auth import (
     AdminAuth,
     PASSWORD_HASH_PREFIX,
     admin_exists,
-    check_admin_login,
     check_login,
     check_user_exists,
     check_user_simple,
     delete_user,
+    get_admin_token,
+    get_user_password,
     regis_admin,
     regis_user,
     simple_auth,
     update_user,
     users_auths,
 )
+from Pre_Checkup.gobbie.gobbie_ai.precheckup_ai import PreCheckupAI
+from Pre_Checkup.pre_checkup_crud import get_health_logs, get_user_name
 
 
 def _show_users(session: Session):
@@ -86,6 +91,21 @@ def _login_user(session: Session):
         print("Login failed.")
 
 
+def _test_get_user_password(session: Session):
+    user_token = input("User token: ").strip()
+    password = get_user_password(session, user_token)
+    if password is None:
+        print("User not found.")
+        return
+
+    password_status = (
+        "hashed"
+        if password.startswith(PASSWORD_HASH_PREFIX)
+        else "plain text (legacy)"
+    )
+    print(f"Password found; stored as {password_status}.")
+
+
 def _update_user_password(session: Session):
     user_name = input("Username: ").strip()
     user_email = input("Email: ").strip()
@@ -139,12 +159,15 @@ def _register_admin(session: Session):
 
 
 def _login_admin(session: Session):
-    admin_name = input("Admin username: ").strip()
+    admin_email = input("Admin email: ").strip()
     password = getpass.getpass("Admin password: ")
-    if check_admin_login(session, admin_name, password):
-        print("Admin login successful.")
-    else:
+    admin_token = get_admin_token(session, admin_email, password)
+    if admin_token is None:
         print("Admin login failed.")
+        return
+
+    print("Admin login successful.")
+    print(f"Admin token: {admin_token}")
 
 
 def _add_simple_user(session: Session):
@@ -213,6 +236,47 @@ def _create_missing_tables(_: Session):
     print("Database tables are ready.")
 
 
+def _test_pre_checkup_summary(session: Session):
+    user_token = getpass.getpass("User token (input hidden): ").strip()
+    if not user_token:
+        print("User token is required.")
+        return
+
+    logs = get_health_logs(session, user_token)
+    if not logs:
+        print("No health logs found for this user.")
+        return
+
+    confirmation = input(
+        f"Send {len(logs)} health log(s) to Gemini for a summary? (y/N): "
+    ).strip().lower()
+    if confirmation != "y":
+        print("Pre-checkup summary test cancelled.")
+        return
+
+    try:
+        ai = PreCheckupAI()
+    except ValueError as error:
+        print(f"Pre-checkup AI is not configured: {error}")
+        return
+
+    patient_data = {
+        "patient_id": "anonymous",
+        "logs": json.loads(json.dumps(logs, separators=(",", ":"), default=str)),
+    }
+    summary = ai.generate_summary(patient_data)
+    summary["generated_at"] = datetime.now(timezone.utc).isoformat()
+
+    print("Pre-checkup AI summary:")
+    print(
+        json.dumps(
+            {"Name": get_user_name(session, user_token), "Summary": summary},
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
 def terminal_db_tester(session: Session):
     actions = {
         "1": ("Register user", _register_user),
@@ -229,6 +293,8 @@ def terminal_db_tester(session: Session):
         "12": ("Delete simple-login user", _delete_simple_user),
         "13": ("Delete admin", _delete_admin),
         "14": ("Create missing tables if needed", _create_missing_tables),
+        "15": ("Test get user password by token", _test_get_user_password),
+        "16": ("Test pre-checkup summary with Gobbie AI", _test_pre_checkup_summary),
     }
 
     while True:

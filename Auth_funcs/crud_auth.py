@@ -91,9 +91,24 @@ def check_user_exists(session: Session, user_name, user_email):
     )
     return user is not None
 
+def get_user_password(session: Session, user_token: str) -> Optional[str]:
+    user = session.query(users_auths).filter_by(userToken=user_token).first()
+    return user.userPassword if user is not None else False
 
-def check_login(session: Session, user_name, user_password):
-    user = session.query(users_auths).filter_by(userName=user_name).first()
+
+def check_user_password(
+    session: Session,
+    user_token: str,
+    password: str,
+) -> bool:
+    stored_password = get_user_password(session, user_token)
+    if stored_password is False:
+        return False
+    return verify_password(password, stored_password)
+
+
+def check_login(session: Session, user_email, user_password):
+    user = session.query(users_auths).filter_by(email=user_email).first()
     if user is None or not verify_password(user_password, user.userPassword):
         return False
 
@@ -102,6 +117,10 @@ def check_login(session: Session, user_name, user_password):
         session.commit()
     return True
 
+def fetched_user_name(session: Session, user_token):
+    user = session.query(users_auths).filter_by(userToken=user_token).first()
+    return user.userName if user is not None else None
+
 def check_user_simple(session: Session, user_name, user_group):
     user = (
         session.query(simple_auth)
@@ -109,6 +128,20 @@ def check_user_simple(session: Session, user_name, user_group):
         .first()
     )
     return user is not None
+
+
+def get_user_token_by_name_and_group(
+    session: Session,
+    user_name: str,
+    user_group: str,
+) -> Optional[str]:
+    user = (
+        session.query(users_auths)
+        .filter_by(userName=user_name, assignedGroup=user_group)
+        .first()
+    )
+    return user.userToken if user is not None else None
+
 
 def regis_admin(session: Session, admin_name, admin_group, generated_tokens, admin_email, admin_password):
     new_user = AdminAuth(
@@ -133,16 +166,79 @@ def admin_exists(session: Session, admin_name, admin_email):
     )
     return admin is not None
 
-
-def check_admin_login(session: Session, admin_name, admin_password):
-    admin = session.query(AdminAuth).filter_by(adminName=admin_name).first()
-    if admin is None or not verify_password(admin_password, admin.adminPassword):
+def delete_user_by_token(session: Session, user_token):
+    deletion = (session.query(users_auths).filter(users_auths.userToken == user_token).first())
+    if deletion:
+        session.delete(deletion)
+        session.commit()
+        return True
+    else:
         return False
+
+def admin_name(session: Session, admin_token: str):
+    admin = session.query(AdminAuth).filter_by(adminToken=admin_token).first()
+    return admin.adminName if admin is not None else False
+
+
+def authenticate_admin(
+    session: Session,
+    admin_email: str,
+    admin_password: str,
+) -> Optional[str]:
+    return get_admin_token(session, admin_email, admin_password)
+
+def get_admin_token(
+    session: Session,
+    admin_email: str,
+    admin_password: str,
+) -> Optional[str]:
+    admin = session.query(AdminAuth).filter_by(adminEmail=admin_email).first()
+    if admin is None or not verify_password(admin_password, admin.adminPassword):
+        return None
 
     if not admin.adminPassword.startswith(PASSWORD_HASH_PREFIX):
         admin.adminPassword = hash_password(admin_password)
         session.commit()
-    return True
+    return admin.adminToken
+
+
+def check_admin_login(session: Session, admin_email, admin_password) -> bool:
+    return authenticate_admin(session, admin_email, admin_password) is not None
+
+def get_all_managed_users(
+    session: Session,
+    admin_token: str,
+) -> Optional[list[dict[str, Optional[str]]]]:
+    admin = session.query(AdminAuth).filter_by(adminToken=admin_token).first()
+    if admin is None:
+        return None
+
+    users = (
+        session.query(users_auths)
+        .filter_by(assignedGroup=admin.adminGroupName)
+        .order_by(users_auths.userName)
+        .all()
+    )
+    return [
+        {
+            "user_name": user.userName,
+            "user_token": user.userToken,
+        }
+        for user in users
+    ]
+
+
+def get_group_name(session: Session, admin_token: str) -> Optional[str]:
+    admin = session.query(AdminAuth).filter_by(adminToken=admin_token).first()
+    return admin.adminGroupName if admin is not None else None
+
+
+def get_managed_user_number(session: Session, group_name: str) -> int:
+    return (
+        session.query(users_auths)
+        .filter_by(assignedGroup=group_name)
+        .count()
+    )
 
 
 

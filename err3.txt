@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Hackathon2_backend_branch1\test_main.py", line 1, in <module>
+    import main
+  File "C:\Users\ThinkPad\Hackathon2_backend_branch1\main.py", line 11, in <module>
+    from Post_Checkup.post_checkup_endpoints import router as post_checkup_router
+  File "C:\Users\ThinkPad\Hackathon2_backend_branch1\Post_Checkup\post_checkup_endpoints.py", line 11, in <module>
+    from Post_Checkup_AI import DoctorNote, PostCheckUpAI
+ImportError: cannot import name 'DoctorNote' from 'Post_Checkup_AI' (C:\Users\ThinkPad\Hackathon2_backend_branch1\Post_Checkup_AI\__init__.py)

@@ -28,6 +28,25 @@ def createTableInCase(engine: Optional[Engine] = None) -> None:
                 )
             )
 
+        actionable_plan_columns = {
+            column["name"]
+            for column in inspect(connection).get_columns("user_actionable_plan")
+        }
+        if "actionableTitle" not in actionable_plan_columns:
+            connection.execute(
+                text(
+                    "ALTER TABLE user_actionable_plan "
+                    "ADD COLUMN actionableTitle VARCHAR(225) NOT NULL DEFAULT ''"
+                )
+            )
+        if "actionableDesc" not in actionable_plan_columns:
+            connection.execute(
+                text(
+                    "ALTER TABLE user_actionable_plan "
+                    "ADD COLUMN actionableDesc VARCHAR(225) NOT NULL DEFAULT ''"
+                )
+            )
+
 
 @lru_cache(maxsize=1)
 def get_engine() -> Engine:

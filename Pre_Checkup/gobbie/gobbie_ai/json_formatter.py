@@ -1,12 +1,9 @@
-
 class JSONFormatter:
 
     def group_by_patient(self, logs):
 
         if not isinstance(logs, list):
-            raise ValueError(
-                "Logs harus berbentuk list."
-            )
+            raise ValueError("Logs harus berbentuk list.")
 
         grouped_data = {}
 
@@ -27,18 +24,9 @@ class JSONFormatter:
             patient_id = str(patient_id)
 
             if patient_id not in grouped_data:
+                grouped_data[patient_id] = []
 
-                grouped_data[patient_id] = {
-                    "patient_id": patient_id,
-                    "logs": []
-                }
-
-            grouped_data[patient_id]["logs"].append(log)
-
-        print(
-            f"[JSON FORMATTER] Grouped {len(logs)} logs "
-            f"into {len(grouped_data)} patients."
-        )
+            grouped_data[patient_id].append(log)
 
         return grouped_data
 
@@ -51,6 +39,31 @@ class JSONFormatter:
                 f"Patient ID {patient_id} tidak ditemukan."
             )
 
-        patient_data = grouped_data[patient_id]
+        logs = grouped_data[patient_id]
 
-        return patient_data
+        # Susun log berdasarkan tanggal
+        logs = sorted(
+            logs,
+            key=lambda log: log.get("date", "")
+        )
+
+        timeline = []
+
+        for log in logs:
+
+            date = log.get("date", "Tanggal tidak tersedia")
+            report = log.get("report", "")
+
+            if report:
+                timeline.append(
+                    f"Tanggal {date}: {report}"
+                )
+
+        # Format sebagai satu paragraf untuk input AI
+        formatted_timeline = (
+            f"Timeline laporan pasien {patient_id}: "
+            + ". ".join(timeline)
+            + "."
+        )
+
+        return formatted_timeline
