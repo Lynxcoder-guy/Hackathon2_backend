@@ -50,7 +50,7 @@ def createTableInCase(engine: Optional[Engine] = None) -> None:
 
 @lru_cache(maxsize=1)
 def get_engine() -> Engine:
-    database_url = os.getenv("DATABASE_USER_AUTHENTICATION")
+    database_url = os.getenv("DATABASE_USER_AUTHENTICATION", "").strip()
     if not database_url:
         raise RuntimeError("Set the DATABASE_USER_AUTHENTICATION environment variable")
     engine = create_engine(database_url)
