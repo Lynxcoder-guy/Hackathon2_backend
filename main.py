@@ -47,11 +47,12 @@ def check_run():
 app = CORSMiddleware(
     app=api,
     allow_origins=cors_origins,
-    allow_origin_regex=cors_origin_regex,
+    allow_origin_regex=cors_origin_regex,  # Otomatis mengizinkan http://localhost:5173, :3000, dll.
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 def run_terminal_tools():
