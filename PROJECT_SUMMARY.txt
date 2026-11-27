@@ -1,0 +1,172 @@
+Hackathon Backend Project Summary
+Generated: 2026-11-21
+
+BRANCH
+------
+Branch: 2-build-the-api-routes-for-authentication
+Repository: Lynxcoder-guy/Hackathon2_backend
+
+PROJECT SIZE
+------------
+Tracked files: 29
+Python files: 23
+Total tracked lines: 2,218
+Python lines: 2,131
+
+WHAT THIS BACKEND DOES
+----------------------
+
+1. Authentication
+   - User registration
+   - User login
+   - Simple login
+   - Admin registration
+   - Admin login
+   - Password hashing and verification
+   - Upgrade of legacy plaintext passwords to hashed passwords
+   - User, simple-user, and admin database management through a terminal tool
+
+2. Pre-checkup workflow
+   - Accepts a user token
+   - Reads that user's health logs
+   - Looks up the user name
+   - Sends the logs to the Gobbie AI service
+   - Generates and returns a summarized pre-checkup report
+   - Includes offline and prompt testing utilities
+
+3. Weekly health logs
+   - Accepts health-log text
+   - Stores the creation date
+   - Associates the log with a user token
+
+4. Post-checkup workflow
+   - Saves original doctor advice
+   - Saves a simplified-advice field
+   - Stores the last checkup date
+   - Provides an endpoint for retrieving actionable plans
+   > Create the actionable plan
+   > Create the simplified advice
+
+MAIN API FEATURES
+-----------------
+The FastAPI application in main.py includes CORS configuration and these routers:
+
+Authentication:
+- POST /register-admin
+- POST /check-user
+- POST /simple-login
+- POST /admin-register
+- POST /admin-login
+
+Pre-checkup:
+- POST /pre-checkup
+
+Weekly condition logs:
+- POST /submit-health-log
+
+Post-checkup:
+- POST /post-checkup
+- POST /actionable-plan
+
+The root endpoint is:
+- GET /
+
+TECHNOLOGY STACK
+----------------
+- Python
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- MySQL-compatible database configuration
+- Google GenAI package
+- Uvicorn
+- CORS middleware
+
+DATABASE
+--------
+SQLAlchemy models and CRUD logic cover:
+- users_auths
+- simple_auths
+- admin_auths
+- doctor_advice_notes
+- user_actionable_plan
+- weekly/user health logs
+
+Database tables are created automatically on engine initialization.
+
+PROJECT STRUCTURE
+-----------------
+main.py
+  FastAPI application setup, CORS, routers, and terminal menu
+
+Auth_funcs/
+  Authentication endpoints, password security, database setup, and SQLAlchemy auth models
+
+Pre_Checkup/
+  Pre-checkup endpoint and health-log retrieval
+
+Pre_Checkup/gobbie/
+  AI prompt, response formatting, history, reporting, and test utilities
+
+Post_Checkup/
+  Post-checkup advice storage and actionable-plan retrieval
+
+Weekly_Condition_logs/
+  Health-log submission models and database CRUD
+
+terminal_tester.py
+  Interactive database testing and maintenance tool
+
+TESTING AND SUPPORT FILES
+-------------------------
+The branch contains several Gobbie test scripts, including:
+- Prompt testing
+- Offline integration testing
+- Daily-report testing
+- History testing
+- A real-AI test script
+
+Most tests are standalone scripts rather than a full pytest suite.
+
+RECENT DEVELOPMENT
+------------------
+Recent commits:
+- eb46725 | 2026-11-20 | Added features
+- 8255290 | 2026-11-15 | More endpoints and database query
+- 3ff19ed | 2026-11-15 | I have some changes
+- ce9e6dd | 2026-11-15 | Add files via upload
+
+CURRENT UNCOMMITTED WORK
+------------------------
+Only these files are currently modified:
+- Post_Checkup/post_checkup_crud.py
+- Post_Checkup/post_checkup_endpoints.py
+
+The uncommitted work added:
+- doctor-advice saving support
+- a user actionable-plan database model
+- actionable-plan retrieval
+- the /actionable-plan endpoint
+
+KNOWN AREAS TO FINISH
+---------------------
+- The simplified post-checkup advice is currently a placeholder string:
+  "Function name"
+- The actionable-plan model incorrectly marks userToken as unique. That
+  prevents more than one plan row per user.
+- There is no visible CRUD function for creating actionable-plan rows.
+- The /actionable-plan response currently needs to be checked carefully:
+  it should return the list directly when plans exist and an explicit
+  "no plans" result when none exist.
+- There is no README yet.
+- Several database and AI behaviors do not appear to have an automated test
+  suite.
+- Some scripts and modules may depend on environment variables and external
+  database/API configuration.
+
+OVERALL STATUS
+--------------
+This is a substantial hackathon backend with a complete architectural shape:
+authentication, user-specific data, AI processing, health logs, and
+post-checkup features. The core foundations are present, but a few post-checkup
+and testing pieces are unfinished.

@@ -3,14 +3,24 @@ import re
 from pathlib import Path
 from datetime import datetime
 
+from dotenv import load_dotenv
 from google import genai
+
+# Force load .env and override any stale system environment variables
+load_dotenv(override=True)
 
 
 # =========================================================
 # CONFIGURATION
 # =========================================================
 
-MODEL_NAME = "gemini-3.8-flash"
+# Use Flash-Lite for a much higher Free Tier daily limit
+MODEL_NAME = "gemini-3.5-flash-lite"
+
+
+# =========================================================
+# CONFIGURATION
+# =========================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

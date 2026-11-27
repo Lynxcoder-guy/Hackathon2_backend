@@ -29,6 +29,5 @@ def setHealthLogs(
     )
     db.add(new_log)
     db.commit()
-    db.refresh(new_log)
-    return "Health log added successfully."
+    return True
 

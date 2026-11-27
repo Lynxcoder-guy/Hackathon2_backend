@@ -8,7 +8,8 @@ from google.genai import types
 
 class PreCheckupAI:
 
-    def __init__(self, model="gemini-3.8-flash"):
+    def __init__(self, model="gemini-3.5-flash-lite"):
+
 
         self.model = model
 

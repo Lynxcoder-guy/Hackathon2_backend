@@ -1,2 +1,8 @@
 google-genai
+pydantic
+python-dotenv
+fastapi
+sqlalchemy
+uvicorn
+pymysql
 mysql-connector-python
