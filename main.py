@@ -49,7 +49,7 @@ app = CORSMiddleware(
     allow_origins=[
     "https://hackathon-2.shalbia549.workers.dev",
     "http://localhost:5173",
-]
+],
     allow_origin_regex=cors_origin_regex,  # Otomatis mengizinkan http://localhost:5173, :3000, dll.
     allow_credentials=True,
     allow_methods=["*"],
